@@ -1,14 +1,19 @@
 import './style.css'
 const body = document.querySelector('body');
-//just to check and see if file worked
-function content() {
-    const hello = document.createElement("div");
-    hello.classList.add("title");
-    hello.innerHTML = "Hello";
 
-    body.appendChild(hello);
-};
-content();
+
+const sidebarCreate = (()=> {
+    const sidebar = document.createElement("div");
+    sidebar.classList.add("sidebar-class");
+
+    body.appendChild(sidebar);
+})();
+
+sidebarCreate
+
+export {sidebarCreate}
+
+
 
 //code for project tabs / sidebar
     //use HTML DOM Input Text Object
