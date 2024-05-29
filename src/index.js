@@ -1,17 +1,44 @@
 import './style.css'
 const body = document.querySelector('body');
 
+const project = []
+
 
 const sidebarCreate = (()=> {
     const sidebar = document.createElement("div");
     sidebar.classList.add("sidebar-class");
 
     body.appendChild(sidebar);
+
+    return {
+        sidebar
+    }
+
 })();
 
-sidebarCreate
+const inputCreate = (()=> {
+    const projectInsert = document.createElement("input");
+    projectInsert.setAttribute("type", "text");
+    projectInsert.classList.add("input-class");
 
-export {sidebarCreate}
+    const projectButton = document.createElement("input");
+    projectButton.setAttribute("type", "button");
+    projectButton.classList.add("input-button");
+    projectButton.setAttribute("value", "+");
+    
+    sidebarCreate.sidebar.appendChild(projectButton);
+    sidebarCreate.sidebar.appendChild(projectInsert);
+
+    return {
+        projectInsert,
+        projectButton
+    }
+
+})();
+
+
+
+
 
 
 
