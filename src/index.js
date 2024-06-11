@@ -1,7 +1,7 @@
 import './style.css'
 const body = document.querySelector('body');
 
-const project = []
+const projectList = []
 
 
 const sidebarCreate = (()=> {
@@ -16,7 +16,7 @@ const sidebarCreate = (()=> {
 
 })();
 
-const inputCreate = (()=> {
+const sidebarContainerCreate = (()=> {
     const projectInsert = document.createElement("input");
     projectInsert.setAttribute("type", "text");
     projectInsert.classList.add("input-class");
@@ -35,6 +35,34 @@ const inputCreate = (()=> {
     }
 
 })();
+
+let projectInsert = sidebarContainerCreate.projectInsert
+
+
+
+class project {
+    constructor(projectInsert) {
+        this.projectInsert = projectInsert
+    }
+}
+
+function projectTabs() {
+    sidebarContainerCreate.projectButton.addEventListener("click", () => {
+        //const projectInsertValue  = sidebarContainerCreate.projectInsert.value;
+        let projectAdd = new project (projectInsert.value);
+
+        projectList.push(projectAdd);
+        sidebarContainerCreate.projectInsert.value = " "
+
+        
+    });
+}
+
+projectTabs();
+
+console.log(projectList)
+
+
 
 
 
