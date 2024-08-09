@@ -1,36 +1,50 @@
-import './style.css'
+import './style.css';
 
 const body = document.querySelector('body');
+const dialog = document.getElementById("dialog");
+const exitButton = document.getElementById("exit-button")
+let title = document.getElementById('title');
+let date = document.getElementById("date");
+let description = document.getElementById("description");
+const submitButton = document.getElementById("submit-button");
 
-const projectList = []
+const projectList = ["Default"];
 
-
-const sidebarCreate = (()=> {
+const sidebarCreate = (() => {
     const sidebar = document.createElement("div");
     sidebar.classList.add("sidebar-class");
 
     const header = document.createElement("div");
     header.classList.add("header-class");
 
+    const headerTitle = document.createElement("h1");
+    headerTitle.classList.add("header-title");
+    headerTitle.innerHTML = "Default";
+
     const task = document.createElement("div");
     task.classList.add("task-class");
 
+    const taskControls = document.createElement("div");
+    taskControls.classList.add("task-controls");
+
+    header.appendChild(headerTitle);
     body.appendChild(header);
     body.appendChild(sidebar);
+    task.appendChild(taskControls);
     body.appendChild(task);
-    
 
     return {
         header,
+        headerTitle,
         sidebar,
-        task
-    }
-
+        task,
+        taskControls
+    };
 })();
 
-const sidebarContainerCreate = (()=> {
+const sidebarContainerCreate = (() => {
     const sidebarTitle = document.createElement("h2");
-    sidebarTitle.innerHTML = "Projects"
+    sidebarTitle.innerHTML = "Projects";
 
     const projectInsert = document.createElement("input");
     projectInsert.setAttribute("type", "text");
@@ -41,88 +55,172 @@ const sidebarContainerCreate = (()=> {
     projectButton.classList.add("input-button");
     projectButton.setAttribute("value", "+");
 
-    const projectContainter = document.createElement("div");
-    projectContainter.classList.add("proj-container");
-    
+    const projectContainer = document.createElement("div");
+    projectContainer.classList.add("proj-container");
+
     sidebarCreate.sidebar.appendChild(sidebarTitle);
-    sidebarCreate.sidebar.appendChild(projectButton);
     sidebarCreate.sidebar.appendChild(projectInsert);
-    sidebarCreate.sidebar.appendChild(projectContainter);
+    sidebarCreate.sidebar.appendChild(projectButton);
+    sidebarCreate.sidebar.appendChild(projectContainer);
 
     return {
         sidebarTitle,
         projectInsert,
         projectButton,
-        projectContainter
-    }
-
+        projectContainer
+    };
 })();
 
-
-
-
-class project {
-    constructor(projectInsert) {
-        this.projectInsert = projectInsert
+class Project {
+    constructor(name) {
+        this.name = name;
+        this.tasks = [];
     }
 }
 
-function projectTabs(projects) {
-    sidebarContainerCreate.projectButton.addEventListener("click", () => {
-        const projectInsertValue = sidebarContainerCreate.projectInsert.value;
-        
-        let projectAdd = new project (projectInsertValue);
+class Task {
+    constructor(title, date, description ) {
+        this.title = title;
+        this.date = date;
+        this.description = description;
+    }
+}
 
-        projectList.push(projectAdd);
-        sidebarContainerCreate.projectInsert.value = " "
+const createTaskElement = (projectName) => {
+    const projectTitle = document.createElement("h2");
+    projectTitle.classList.add("project-title");
+    projectTitle.innerHTML = projectName;
 
-        const projectTitle = document.createElement("h2");
-            projectTitle.classList.add("project-title");
-            projectTitle.innerHTML = projectInsertValue;
+    sidebarContainerCreate.projectContainer.appendChild(projectTitle);
 
-            sidebarContainerCreate.projectContainter.appendChild(projectTitle);
+    return {
+        projectTitle
+    };
+};
+
+let activeProject = null;
+
+const displayProject = (project) => {
+    activeProject = project;
+    const { task, taskControls, headerTitle } = sidebarCreate;
+
+    task.innerHTML = ''; 
+    headerTitle.innerHTML = project.name;
+
+    // Clear task controls
+    while (taskControls.firstChild) {
+        taskControls.removeChild(taskControls.firstChild);
+    }
+
+    // Add delete and add task buttons
+    const deleteButton = document.createElement('div');
+    deleteButton.classList.add("delete-button");
+    deleteButton.innerHTML = "Delete Project";
+
+    const taskButton = document.createElement("div");
+    taskButton.classList.add("task-button");
+    taskButton.innerHTML = "Add Task";
+
+    taskControls.appendChild(deleteButton);
+    taskControls.appendChild(taskButton);
+    task.appendChild(taskControls);
+
+    // Display tasks
+    const taskList = document.createElement("div");
+    taskList.classList.add("task-list");
+
+    project.tasks.forEach(taskItem => {
+        const taskContainer = document.createElement("div");
+        taskContainer.classList.add("task-item");
+        taskList.appendChild(taskContainer);
+
+        const taskName = document.createElement("div");
+        taskName.classList.add("task-name");
+        taskName.innerHTML = taskItem.title;
+        taskContainer.appendChild(taskName);
+
+        const taskDate = document.createElement("div");
+        taskDate.classList.add("task-date");
+        taskDate.innerHTML = taskItem.date;
+        taskContainer.appendChild(taskDate);
+
+        const taskDesc = document.createElement("div");
+        taskDesc.classList.add("task-desc");
+        taskDesc.innerHTML = taskItem.description;
+        taskContainer.appendChild(taskDesc);
+    });
+    task.appendChild(taskList);
+
+    // Attach event listeners for buttons
+    deleteButton.addEventListener('click', () => {
+        deleteProject(project, project.projectTitle);
+    });
+
+    taskButton.addEventListener('click', () => {
+        dialog.showModal();
     });
 };
 
-projectTabs();
+// Ensure this event listener is only attached once globally
+submitButton.addEventListener('click', () => {
+    if (activeProject) {
+        addTask(activeProject);
+        dialog.close();
+    }
+});
 
+const addProject = () => {
+    const projectName = sidebarContainerCreate.projectInsert.value.trim();
+    if (projectName === '') return;
 
+    // Check if the project already exists
+    const existingProject = projectList.find(proj => proj.name === projectName);
+    if (existingProject) {
+        alert('Project with this name already exists!');
+        return;
+    }
 
+    const newProject = new Project(projectName);
+    projectList.push(newProject);
 
+    const projectElements = createTaskElement(projectName);
 
+    projectElements.projectTitle.addEventListener('click', () => {
+        displayProject(newProject);
+    });
 
+    sidebarContainerCreate.projectInsert.value = ''; 
+};
 
+const deleteProject = (project, projectTitleElement) => {
+    const index = projectList.indexOf(project);
+    if (index > -1) {
+        projectList.splice(index, 1);
+    }
+    sidebarContainerCreate.projectContainer.removeChild(projectTitleElement);
+    sidebarCreate.task.innerHTML = '';  
+    sidebarCreate.taskControls.innerHTML = '';  
+    sidebarCreate.headerTitle.innerHTML = 'Welcome'; 
+};
 
+const addTask = (project) => {
+    let taskItem = new Task(title.value, date.value, description.value);
+    project.tasks.push(taskItem);  // Add the task to the current active project
+    displayProject(project);  // Re-render the project to display the new task
+};
 
+const renderProjects = () => {
+    projectList.forEach(projectName => {
+        const projectElements = createTaskElement(projectName);
 
+        const project = new Project(projectName);
 
+        projectElements.projectTitle.addEventListener('click', () => {
+            displayProject(project);
+        });
+    });
+};
 
+sidebarContainerCreate.projectButton.addEventListener("click", addProject);
 
-//code for project tabs / sidebar
-    //use HTML DOM Input Text Object
-    //use a for each loop to create different tabs for project``````
-    //add a button that deletes said project tab, also add a confirmation dialog popup with yes or no
-
-//function projectTabs() {
-//    sidebarContainerCreate.projectButton.addEventListener("click", () => {
-//        let projectAdd = new project (projectInsert.value);
-
-//        projectList.push(projectAdd);
-//        sidebarContainerCreate.projectInsert.value = " "
-
-//        projectList.forEach((projects)=> {
-//            const projcontainter = document.createElement("div");
-//            projcontainter.classList.add("proj-container");
-//            projcontainter.innerHTML = projects.projectInsert
-
-//            sidebarCreate.sidebar.appendChild(projcontainter);
-            
-//        })
-
-        
-//    });
-//}
-
-//projectTabs();
-
-//console.log(projectList)
+renderProjects();
