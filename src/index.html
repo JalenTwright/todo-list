@@ -8,7 +8,7 @@
 <body>
     <dialog id="dialog">
         <button id="exit-button">X</button>
-        <form method="dialog">
+        <form method="dialog" class="method">
             <label for="title"></label>
             <input type="text" id="title" name="title" placeholder="title" required>
 
@@ -17,6 +17,12 @@
 
             <label for="description"></label>
             <input type="text" id="description" name="description" placeholder="description" required>
+
+            <select name="status" id="priority">
+                <option value="High">High</option>
+                <option value="Low">Low</option>
+                <option value="Medium">Medium</option>
+            </select>
         </form>
         <button id="submit-button">Submit</button>
     </dialog>
